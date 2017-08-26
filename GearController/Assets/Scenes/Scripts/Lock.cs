@@ -1,49 +1,84 @@
-﻿using DG.Tweening;
+﻿using System;
+using DG.Tweening;
 using UnityEngine;
 
 public class Lock : MonoBehaviour
 {
     public Transform[] rings;
     public Transform[] answers;
-    public float[] yDegrees;
+    public Quaternion[] originalRotations;
     public int current;
+    public bool done;
     public bool solved;
     public bool transition;
+    public Action<GameObject> onUnlocked;
+    public bool isRight;
+    public bool isTotalRight = true;
+    public int id;
 
     private void Awake()
     {
-        yDegrees = new float[rings.Length];
+        originalRotations = new Quaternion[rings.Length];
+        for (int i = 0; i < rings.Length; i++)
+        {
+            originalRotations[i] = rings[i].rotation;
+        }
     }
 
 	private void Start ()
     {
+        
+    }
+
+    public void Reset()
+    {
         current = 0;
+        isTotalRight = true;
+        done = isRight = solved = false;
+        InteractiveObject interactiveObject = gameObject.GetComponent<InteractiveObject>();
+        transform.SetParent(Game.Instance.environment, true);
+        transform.position = interactiveObject.originalPosition;
+        transform.rotation = interactiveObject.originalRotation;
+        for (int i = 0; i < rings.Length; i++)
+        {
+            rings[i].gameObject.SetActive(true);
+            rings[i].rotation = originalRotations[i];
+        }
+        if (Game.Instance.itemAttachedToLever1 == transform)
+        {
+            Game.Instance.currentLock = Game.Instance.itemAttachedToLever1 = null;
+        }
+        Game.Instance.itemAttachedToLever2 = null;
     }
 
     private void Update ()
     {
 		if (Input.GetKeyDown(KeyCode.A))
         {
-            Slide(0.125f);
+            Slide(0.25f);
         }
         if (Input.GetKeyDown(KeyCode.B))
         {
-            Slide(-0.125f);
+            Slide(-0.25f);
+        }
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Confirm();
         }
     }
 
     public void Slide(float delta)
     {
-        if (solved || transition)
+        if (solved || done || transition)
         {
             return;
         }
         int len = rings.Length;
-        if (delta > 0.0625f)
+        if (delta > 0.125f)
         {
             RotateTransition(360 / len);
         }
-        else if (delta < -0.0625)
+        else if (delta < -0.125)
         {
             RotateTransition(-360 / len);
         }
@@ -51,6 +86,7 @@ public class Lock : MonoBehaviour
 
     private void RotateTransition(float angle)
     {
+        Game.Instance.info.text = current.ToString();
         transition = true;
         Quaternion before = rings[current].localRotation;
         rings[current].Rotate(Vector3.forward, angle, Space.Self);
@@ -58,18 +94,33 @@ public class Lock : MonoBehaviour
         rings[current].localRotation = before;
         rings[current].DOLocalRotate(after.eulerAngles, 0.125f).OnComplete(() =>
         {
-            if (Mathf.Abs(rings[current].localRotation.eulerAngles.z - answers[current].localRotation.eulerAngles.z) < 0.0078125f)
-            {
-                rings[current].localRotation = answers[current].localRotation;
-                current++;
-                if (current >= rings.Length)
-                {
-                    current = 0;
-                    transform.localScale = transform.localScale * 1.125f;
-                    solved = true;
-                }
-            }
+            isRight = Mathf.Abs(rings[current].localRotation.eulerAngles.z - answers[current].localRotation.eulerAngles.z) < 0.0078125f;
             transition = false;
         });
+    }
+
+    public void Confirm()
+    {
+        if (!transition)
+        {
+            isTotalRight = isTotalRight && isRight;
+            rings[current].localRotation = answers[current].localRotation;
+            current++;
+            Game.Instance.info.text = current.ToString();
+            if (current >= rings.Length)
+            {
+                current = 0;
+                if (onUnlocked != null)
+                {
+                    onUnlocked(gameObject);
+                }
+                done = true;
+                solved = isTotalRight;
+            }
+            else
+            {
+                rings[current - 1].gameObject.SetActive(false);
+            }
+        }
     }
 }

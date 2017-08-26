@@ -14,7 +14,7 @@ public class Game : MonoBehaviour
         }
     }
 
-    private ControlManager _controller;
+    public ControlManager controller;
 
     public enum State
     {
@@ -34,6 +34,7 @@ public class Game : MonoBehaviour
     public Transform controllerAnchor;
     public Transform reticle;
     public float distanceForwardController = 1;
+    public Transform environment;
     public Transform leverPlane;
     public Vector3 leverPlaneNormal;
     public Transform lever1, lever2;
@@ -41,10 +42,24 @@ public class Game : MonoBehaviour
     public Transform itemAttachedToLever1, itemAttachedToLever2;
     public Transform currentItemRaycastHit;
     public Transform currentRaycastHit;
+    public Transform currentLock;
     #endregion
 
-    #region Unlock
+    #region Unlock Key
     public float lastX;
+    #endregion
+
+    #region Unlock Treasure
+    public Treasure treasure;
+    public Transform knife;
+    #endregion
+
+    #region Cut Rope
+    public bool firstGetKnife = true;
+    public Quaternion lastKnifeRotation;
+    public float cutTime = 1;
+    public float cutTimer;
+    public Transform rope;
     #endregion
 
     public const string CORRECT_ITEM = "CorrectItem";
@@ -77,18 +92,21 @@ public class Game : MonoBehaviour
         {
             yield return null;
         }
-        _controller = ControlManager.Instance;
-        _controller.SetupCanvas(canvas);
-        if (_controller.control == ControlManager.Control.GearVR)
+        controller = ControlManager.Instance;
+        controller.SetupCanvas(canvas);
+        if (controller.control == ControlManager.Control.GearVR)
         {
             controllerAnchor = gearVRControllerAnchor;
         }
-        else if (_controller.control == ControlManager.Control.Daydream)
+        else if (controller.control == ControlManager.Control.Daydream)
         {
             controllerAnchor = daydreamControllerAnchor;
         }
 
         leverPlaneNormal = leverPlane.forward;
+
+        items[3].GetComponent<Lock>().onUnlocked = items[4].GetComponent<Lock>().onUnlocked = OnUnlockItem;
+        treasure.unlockedEvent = UnlockedTreasureEvent;
 
         interactiveSample.onPointerClick = (go) => { info.text = "Click"; };
         interactiveSample.onPointerExit = (go) => { info.text = "Exit"; };
@@ -96,13 +114,57 @@ public class Game : MonoBehaviour
 
     private void Update ()
     {
-        if (_controller == null)
+        if (controller == null)
         {
             return;
         }
 
-        //ChooseItemProcess();
-        UnlockProcess(items[2].GetComponent<Lock>());
+        if (!treasure.unlocked)
+        {
+            ChooseItemProcess();
+            if (currentLock != null)
+            {
+                UnlockProcess(currentLock.GetComponent<Lock>());
+            }
+        }
+        else
+        {
+            if (firstGetKnife)
+            {
+                firstGetKnife = false;
+                lever1.rotation = lever2.rotation = controllerAnchor.rotation * Quaternion.Euler(0, 180, 0);
+                lastKnifeRotation = knife.rotation;
+            }
+            else
+            {
+                float dot = Vector3.Dot(knife.forward, Vector3.right) / knife.forward.magnitude;
+                float angle = Quaternion.Angle(knife.rotation, lastKnifeRotation);
+                if (angle > 180)
+                {
+                    angle -= 180;
+                }
+                else if (angle < -180)
+                {
+                    angle += 180;
+                }
+                angle = Mathf.Abs(angle);
+                info.text = dot + " " + angle;
+                if ((dot >= 0.75 || dot <= -0.75) && angle >= 3)
+                {
+                    cutTimer += Time.deltaTime;
+                    if (cutTimer >= cutTime)
+                    {
+                        rope.gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        info.text += " " + cutTimer.ToString();
+                    }
+                }
+                lastKnifeRotation = knife.rotation;
+                lever1.rotation = lever2.rotation = controllerAnchor.rotation * Quaternion.Euler(0, 180, 0);
+            }
+        }
     }
 
     public void OnStartButtonClicked()
@@ -113,7 +175,7 @@ public class Game : MonoBehaviour
     private void ChooseItemProcess()
     {
         Ray ray;
-        if (_controller.control == ControlManager.Control.Daydream)
+        if (controller.control == ControlManager.Control.Daydream)
         {
             ray = new Ray(controllerAnchor.position, reticle.position - controllerAnchor.position);
             line.SetPosition(0, controllerAnchor.position);
@@ -148,17 +210,21 @@ public class Game : MonoBehaviour
         Vector3 project = original - (Vector3.Dot(original, leverPlaneNormal) / leverPlaneNormal.sqrMagnitude) * leverPlaneNormal;
         lever1.rotation = lever2.rotation = Quaternion.LookRotation(project);
 
-        if (_controller.SecondaryButtonDown)
+        if (controller.SecondaryButtonDown)
         {
             //info.text = "SecondaryButtonDown";
             if (itemAttachedToLever1 == null)
             {
-                if (currentItemRaycastHit != null)
+                if (currentItemRaycastHit != null && itemAttachedToLever2 == null)
                 {
                     info.text = currentItemRaycastHit.name;
                     currentItemRaycastHit.SetParent(lever1End, true);
                     currentItemRaycastHit.localPosition = Vector3.zero;
                     itemAttachedToLever1 = currentItemRaycastHit;
+                    if (itemAttachedToLever1.CompareTag(CORRECT_ITEM))
+                    {
+                        currentLock = itemAttachedToLever1;
+                    }
                 }
                 else
                 {
@@ -171,7 +237,7 @@ public class Game : MonoBehaviour
                 itemAttachedToLever1.SetParent(null);
                 itemAttachedToLever1.position = itemAttachedToLever1.GetComponent<InteractiveObject>().originalPosition;
                 itemAttachedToLever1.rotation = itemAttachedToLever1.GetComponent<InteractiveObject>().originalRotation;
-                itemAttachedToLever1 = null;
+                currentLock = itemAttachedToLever1 = null;
             }
         }
 
@@ -187,15 +253,46 @@ public class Game : MonoBehaviour
 
     private void UnlockProcess(Lock @lock)
     {
-        if (_controller.IsTouchDown)
+        if (controller.IsTouchDown)
         {
-            lastX = _controller.TouchPos.x;
+            lastX = controller.TouchPos.x;
         }
-        if (_controller.IsTouching)
+        if (controller.IsTouching)
         {
-            float delta = _controller.TouchPos.x - lastX;
-            lastX = _controller.TouchPos.x;
+            float delta = controller.TouchPos.x - lastX;
+            lastX = controller.TouchPos.x;
             @lock.Slide(delta);
+            if (@lock.done)
+            {
+                currentLock = null;
+            }
         }
+        if (controller.TouchpadButtonDown)
+        {
+            @lock.Confirm();
+        }
+    }
+
+    private void OnUnlockItem(GameObject go)
+    {
+        go.transform.SetParent(lever2End, true);
+        go.transform.localPosition = Vector3.zero;
+        itemAttachedToLever2 = go.transform;
+        if (itemAttachedToLever2 == itemAttachedToLever1)
+        {
+            itemAttachedToLever1 = null;
+        }
+    }
+    private void UnlockedTreasureEvent()
+    {
+        if (itemAttachedToLever2 != null)
+        {
+            itemAttachedToLever2.gameObject.SetActive(false);
+        }
+        itemAttachedToLever2 = null;
+
+        knife.gameObject.SetActive(true);
+        knife.SetParent(lever1End, true);
+        knife.localPosition = Vector3.zero;
     }
 }
