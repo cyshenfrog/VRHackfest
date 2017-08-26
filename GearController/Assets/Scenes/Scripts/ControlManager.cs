@@ -51,7 +51,7 @@ public class ControlManager : MonoBehaviour
         {
             if (control == Control.GearVR)
             {
-                return _isTouchDown;
+                return OVRInput.GetDown(OVRInput.Touch.PrimaryTouchpad); ;
             }
             else if (control == Control.Daydream)
             {
@@ -69,7 +69,7 @@ public class ControlManager : MonoBehaviour
         {
             if (control == Control.GearVR)
             {
-                return (OVRInput.Get(OVRInput.Axis2D.PrimaryTouchpad) != Vector2.zero);
+                return OVRInput.Get(OVRInput.Touch.PrimaryTouchpad);
             }
             else if (control == Control.Daydream)
             {
@@ -88,7 +88,7 @@ public class ControlManager : MonoBehaviour
         {
             if (control == Control.GearVR)
             {
-                return OVRInput.Get(OVRInput.Touch.PrimaryTouchpad);
+                return OVRInput.Get(OVRInput.Button.PrimaryTouchpad);
             }
             else if (control == Control.Daydream)
             {
@@ -104,11 +104,11 @@ public class ControlManager : MonoBehaviour
         {
             if (control == Control.GearVR)
             {
-                return OVRInput.GetDown(OVRInput.Touch.PrimaryTouchpad);
+                return OVRInput.GetDown(OVRInput.Button.PrimaryTouchpad);
             }
             else if (control == Control.Daydream)
             {
-                return GvrControllerInput.TouchDown;
+                return GvrControllerInput.ClickButtonDown;
             }
             return false;
         }
@@ -120,11 +120,11 @@ public class ControlManager : MonoBehaviour
         {
             if (control == Control.GearVR)
             {
-                return OVRInput.GetUp(OVRInput.Touch.PrimaryTouchpad);
+                return OVRInput.GetUp(OVRInput.Button.PrimaryTouchpad);
             }
             else if (control == Control.Daydream)
             {
-                return GvrControllerInput.TouchUp;
+                return GvrControllerInput.ClickButtonUp;
             }
             return false;
         }
@@ -152,7 +152,7 @@ public class ControlManager : MonoBehaviour
         {
             if (control == Control.GearVR)
             {
-                return OVRInput.GetUp(OVRInput.RawButton.Back);
+                return OVRInput.Get(OVRInput.RawButton.Back);
             }
             else if (control == Control.Daydream)
             {
@@ -232,7 +232,7 @@ public class ControlManager : MonoBehaviour
             gearVR.SetActive(false);
             daydream.SetActive(true);
         }
-        OVRTouchpad.TouchHandler += HandleTouchHandler;
+        //OVRTouchpad.TouchHandler += HandleTouchHandler;
     }
 	
 	private void Update ()
