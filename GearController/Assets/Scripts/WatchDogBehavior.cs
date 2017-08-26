@@ -52,7 +52,7 @@ public class WatchDogBehavior : MonoBehaviour
         }
     }
 
-    public bool OverShorder;
+    public bool OverShorder = false;
     private bool CanAccumulate = true;
     private Vector3 posBeforeWarning;
     private Vector3 lastVRheadRot;
