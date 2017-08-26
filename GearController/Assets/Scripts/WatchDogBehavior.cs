@@ -15,6 +15,12 @@ public class WatchDogBehavior : MonoBehaviour
     public float AngryRate;
     public Animator anim;
     public Text debugtext;
+    public AudioSource Fx1;
+    public AudioSource WalkFx;
+    public AudioClip walk;
+    public AudioClip attack;
+    public AudioClip angry;
+    public AudioClip notice;
 
     private enum AnimList
     {
@@ -53,7 +59,7 @@ public class WatchDogBehavior : MonoBehaviour
     }
 
     public bool OverShorder = false;
-    private bool CanAccumulate = true;
+    private bool CanAccumulate = false;
     private Vector3 posBeforeWarning;
     private Vector3 lastVRheadRot;
     private Vector3 delta;
@@ -74,7 +80,7 @@ public class WatchDogBehavior : MonoBehaviour
     private void Start()
     {
         WalkAround();
-        Invoke("OnSecondPhase", 3);
+        //Invoke("OnSecondPhase", 3);
         //Move(Vector3.forward * 10, 0, 2, () => { });
         lastVRheadRot = NoticeTarget.eulerAngles;
     }
@@ -175,6 +181,7 @@ public class WatchDogBehavior : MonoBehaviour
 
     private void Noticed()
     {
+        Fx1.PlayOneShot(notice);
         GoChecking = true;
         posBeforeWarning = transform.position;
         if (secondPhase)
@@ -236,15 +243,18 @@ public class WatchDogBehavior : MonoBehaviour
         switch (state)
         {
             case AnimList.Idle:
+                WalkFx.Stop();
                 anim.SetBool("Walk", false);
                 anim.SetBool("Run", false);
                 break;
 
             case AnimList.Walk:
+                WalkFx.Play();
                 anim.SetBool("Walk", true);
                 break;
 
             case AnimList.Atk:
+                Fx1.PlayOneShot(attack);
                 anim.SetTrigger("Attack");
                 break;
 
@@ -253,6 +263,7 @@ public class WatchDogBehavior : MonoBehaviour
                 break;
 
             case AnimList.Angry:
+                Fx1.PlayOneShot(angry);
                 anim.SetTrigger("Angry");
                 break;
 
