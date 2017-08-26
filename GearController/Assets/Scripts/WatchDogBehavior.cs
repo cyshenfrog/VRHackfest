@@ -17,10 +17,11 @@ public class WatchDogBehavior : MonoBehaviour
     public Text debugtext;
     public AudioSource Fx1;
     public AudioSource WalkFx;
-    public AudioClip walk;
+    public AudioClip BGM2;
     public AudioClip attack;
     public AudioClip angry;
     public AudioClip notice;
+    public GameObject FailUI;
 
     private enum AnimList
     {
@@ -59,12 +60,13 @@ public class WatchDogBehavior : MonoBehaviour
     }
 
     public bool OverShorder = false;
-    private bool CanAccumulate = false;
+    private bool CanAccumulate = true;
     private Vector3 posBeforeWarning;
-    private Vector3 lastVRheadRot;
-    private Vector3 delta;
+    private Quaternion lastVRheadRot;
+    private float delta;
     private float degreeOffset;
     private int turnLevel;
+    private int warningTimes = 0;
     private float LookingCd = 10;
     public static WatchDogBehavior instance = null;
 
@@ -80,9 +82,9 @@ public class WatchDogBehavior : MonoBehaviour
     private void Start()
     {
         WalkAround();
-        //Invoke("OnSecondPhase", 3);
+        Invoke("OnSecondPhase", 3);
         //Move(Vector3.forward * 10, 0, 2, () => { });
-        lastVRheadRot = NoticeTarget.eulerAngles;
+        lastVRheadRot = NoticeTarget.rotation;
     }
 
     // Update is called once per frame
@@ -105,10 +107,11 @@ public class WatchDogBehavior : MonoBehaviour
                 }
             }
 
-            delta = NoticeTarget.eulerAngles - lastVRheadRot;
-            NoticeValue += delta.magnitude * AngryRate;
+            delta = Quaternion.Angle(NoticeTarget.rotation, lastVRheadRot);
+            NoticeValue += delta * AngryRate;
 
-            lastVRheadRot = NoticeTarget.eulerAngles;
+            lastVRheadRot = NoticeTarget.rotation;
+            NoticeValue -= 0.05f * AngryRate;
         }
         else
         {
@@ -168,6 +171,11 @@ public class WatchDogBehavior : MonoBehaviour
 
     private void Alert()
     {
+        warningTimes++;
+        if (warningTimes >= 3)
+        {
+            Fail();
+        }
         posBeforeWarning = transform.position;
         CanAccumulate = false;
 
@@ -227,6 +235,7 @@ public class WatchDogBehavior : MonoBehaviour
     public void OnSecondPhase()
     {
         secondPhase = true;
+        BgmManager.instance.PlayBgm(BGM2);
         Move(NoticePos.position, 0, 2, () =>
         {
             transform.DOLookAt(NoticeTarget.position, 0.5f).OnComplete(() =>
@@ -290,5 +299,12 @@ public class WatchDogBehavior : MonoBehaviour
             .SetEase(Ease.Linear)
             .SetDelay(delay)
             .OnComplete(() => { onFinish(); });
+    }
+
+    private void Fail()
+    {
+        CanAccumulate = false;
+        FailUI.SetActive(true);
+        BgmManager.instance.VolumeFadeout(0.5f, BgmManager.Channel.bgmSource);
     }
 }
