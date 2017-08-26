@@ -44,6 +44,25 @@ public class ControlManager : MonoBehaviour
             }
         }
     }
+    private bool _isTouchDown;
+    public bool IsTouchDown
+    {
+        get
+        {
+            if (control == Control.GearVR)
+            {
+                return _isTouchDown;
+            }
+            else if (control == Control.Daydream)
+            {
+                return GvrControllerInput.TouchDown;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
     public bool IsTouching
     {
         get
@@ -213,7 +232,8 @@ public class ControlManager : MonoBehaviour
             gearVR.SetActive(false);
             daydream.SetActive(true);
         }
-	}
+        OVRTouchpad.TouchHandler += HandleTouchHandler;
+    }
 	
 	private void Update ()
     {
@@ -242,6 +262,39 @@ public class ControlManager : MonoBehaviour
             }
         }
 	}
+
+    private void HandleTouchHandler(object sender, EventArgs e)
+    {
+        OVRTouchpad.TouchArgs touchArgs = (OVRTouchpad.TouchArgs)e;
+        /*if (touchArgs.TouchType == OVRTouchpad.TouchEvent.SingleTap)
+        {
+            // TAP!
+        }*/
+        if (touchArgs.TouchType == OVRTouchpad.TouchEvent.SingleTap ||
+            touchArgs.TouchType == OVRTouchpad.TouchEvent.Right ||
+            touchArgs.TouchType == OVRTouchpad.TouchEvent.Left ||
+            touchArgs.TouchType == OVRTouchpad.TouchEvent.Down)
+        {
+            // Down!
+            _isTouchDown = true;
+        }
+        else
+        {
+            _isTouchDown = false;
+        }
+        /*if (touchArgs.TouchType == OVRTouchpad.TouchEvent.Up)
+        {
+            // UP!
+        }
+        if (touchArgs.TouchType == OVRTouchpad.TouchEvent.Right)
+        {
+            // Right!
+        }
+        if (touchArgs.TouchType == OVRTouchpad.TouchEvent.Left)
+        {
+            // Left!
+        }*/
+    }
 
     public void SetupCanvas(GameObject canvas)
     {

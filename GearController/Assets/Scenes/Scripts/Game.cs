@@ -28,6 +28,7 @@ public class Game : MonoBehaviour
 
     public InteractiveObject[] items;
 
+    #region Pick Item
     public Transform gearVRControllerAnchor;
     public Transform daydreamControllerAnchor;
     public Transform controllerAnchor;
@@ -40,6 +41,11 @@ public class Game : MonoBehaviour
     public Transform itemAttachedToLever1, itemAttachedToLever2;
     public Transform currentItemRaycastHit;
     public Transform currentRaycastHit;
+    #endregion
+
+    #region Unlock
+    public float lastX;
+    #endregion
 
     public const string CORRECT_ITEM = "CorrectItem";
     public const string WRONG_ITEM = "WrongItem";
@@ -95,7 +101,8 @@ public class Game : MonoBehaviour
             return;
         }
 
-        ChooseItem();
+        //ChooseItemProcess();
+        UnlockProcess(items[2].GetComponent<Lock>());
     }
 
     public void OnStartButtonClicked()
@@ -103,7 +110,7 @@ public class Game : MonoBehaviour
         startButton.gameObject.SetActive(false);
     }
 
-    private void ChooseItem()
+    private void ChooseItemProcess()
     {
         Ray ray;
         if (_controller.control == ControlManager.Control.Daydream)
@@ -178,8 +185,17 @@ public class Game : MonoBehaviour
         }
     }
 
-    private void Unlock()
+    private void UnlockProcess(Lock @lock)
     {
-
+        if (_controller.IsTouchDown)
+        {
+            lastX = _controller.TouchPos.x;
+        }
+        if (_controller.IsTouching)
+        {
+            float delta = _controller.TouchPos.x - lastX;
+            lastX = _controller.TouchPos.x;
+            @lock.Slide(delta);
+        }
     }
 }
