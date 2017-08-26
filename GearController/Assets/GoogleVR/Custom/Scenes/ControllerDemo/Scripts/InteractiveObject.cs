@@ -5,38 +5,39 @@ using UnityEngine;
 
 public class InteractiveObject : MonoBehaviour
 {
-    public Action onPointerEnter;
-    public Action onPointerExit;
-    public Action onPointerClick;
-    public ControllerDemo main;
+    public Action<GameObject> onPointerEnter;
+    public Action<GameObject> onPointerExit;
+    public Action<GameObject> onPointerClick;
+    public Vector3 originalPosition;
+    public Quaternion originalRotation;
 
-    public void OnPointerEnter()
+    private void Awake()
+    {
+        originalPosition = transform.position;
+        originalRotation = transform.rotation;
+    }
+
+    public void OnPointerEnter(GameObject go)
     {
         if (onPointerEnter != null)
         {
-            onPointerEnter();
+            onPointerEnter(go);
         }
-        //main.info.text = "Cube OnPointerEnter";
-        //transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
     }
 
-    public void OnPointerExit()
+    public void OnPointerExit(GameObject go)
     {
         if (onPointerExit != null)
         {
-            onPointerExit();
+            onPointerExit(go);
         }
-        //main.info.text = "Cube OnPointerExit";
-        //transform.localScale = Vector3.one;
     }
 
-    public void OnPointerClick()
+    public void OnPointerClick(GameObject go)
     {
         if (onPointerClick != null)
         {
-            onPointerClick();
+            onPointerClick(go);
         }
-        //main.info.text = "Cube OnPointerClick";
-        //transform.localScale = Vector3.one * 1.5f;
     }
 }

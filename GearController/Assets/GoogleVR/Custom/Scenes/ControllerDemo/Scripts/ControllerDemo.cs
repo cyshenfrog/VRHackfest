@@ -10,15 +10,15 @@ public class ControllerDemo : MonoBehaviour
 
     private void Start ()
     {
-        cube.onPointerClick = () =>
+        cube.onPointerClick = (go) =>
         {
             info.text = string.Format("clicked {0}", cube.name);
         };
-        cube.onPointerEnter = () =>
+        cube.onPointerEnter = (go) =>
         {
             info.text = string.Format("enterd {0}", cube.name);
         };
-        cube.onPointerExit = () =>
+        cube.onPointerExit = (go) =>
         {
             info.text = string.Format("exit {0}", cube.name);
         };
