@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Lock : MonoBehaviour
 {
+    public int scaleLength = 4;
     public Transform[] rings;
     public Transform[] answers;
     public Quaternion[] originalRotations;
@@ -15,6 +16,8 @@ public class Lock : MonoBehaviour
     public bool isRight;
     public bool isTotalRight = true;
     public int id;
+    public AudioSource slide;
+    public AudioSource confirm;
 
     private void Awake()
     {
@@ -73,14 +76,14 @@ public class Lock : MonoBehaviour
         {
             return;
         }
-        int len = rings.Length;
+        slide.Play();
         if (delta > 0.125f)
         {
-            RotateTransition(360 / len);
+            RotateTransition(360 / scaleLength);
         }
         else if (delta < -0.125)
         {
-            RotateTransition(-360 / len);
+            RotateTransition(-360 / scaleLength);
         }
     }
 
@@ -103,6 +106,7 @@ public class Lock : MonoBehaviour
     {
         if (!transition)
         {
+            confirm.Play();
             isTotalRight = isTotalRight && isRight;
             rings[current].localRotation = answers[current].localRotation;
             current++;

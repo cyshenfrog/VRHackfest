@@ -10,6 +10,7 @@ public class InteractiveObject : MonoBehaviour
     public Action<GameObject> onPointerClick;
     public Vector3 originalPosition;
     public Quaternion originalRotation;
+    public AudioSource onPointerEnterAudio;
 
     private void Awake()
     {
@@ -19,6 +20,10 @@ public class InteractiveObject : MonoBehaviour
 
     public void OnPointerEnter(GameObject go)
     {
+        if (onPointerEnterAudio != null)
+        {
+            onPointerEnterAudio.Play();
+        }
         if (onPointerEnter != null)
         {
             onPointerEnter(go);

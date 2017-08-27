@@ -12,6 +12,10 @@ public class Treasure : MonoBehaviour
     public Action unlockedEvent;
     public bool allowToCheck;
     public int unlockCount = 0;
+    public AudioSource hint;
+    public AudioSource attract;
+    public AudioSource rejectKey;
+    public AudioSource unlockAudio;
 
 	private void Start ()
     {
@@ -36,6 +40,7 @@ public class Treasure : MonoBehaviour
             if (!key.solved ||
                 (key.id == 1 && bodies[0].gameObject.activeSelf))
             {
+                rejectKey.Play();
                 allowToCheck = false;
                 key.Reset();
                 return;
@@ -56,6 +61,7 @@ public class Treasure : MonoBehaviour
                 timer = 0;
                 bodies[key.id].gameObject.SetActive(false);
                 key.Reset();
+                unlockAudio.Play();
                 unlockCount++;
                 if (unlockCount == bodies.Length)
                 {
@@ -71,5 +77,11 @@ public class Treasure : MonoBehaviour
         {
             timer = 0;
         }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        timer = 0;
+        attract.Stop();
     }
 }

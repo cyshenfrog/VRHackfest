@@ -43,6 +43,10 @@ public class Game : MonoBehaviour
     public Transform currentItemRaycastHit;
     public Transform currentRaycastHit;
     public Transform currentLock;
+    public AudioSource attractItem;
+
+    public float dropHeight1, dropHeight2;
+    public AudioSource bigDrop, smallDrop;
     #endregion
 
     #region Unlock Key
@@ -105,7 +109,7 @@ public class Game : MonoBehaviour
 
         leverPlaneNormal = leverPlane.forward;
 
-        items[3].GetComponent<Lock>().onUnlocked = items[4].GetComponent<Lock>().onUnlocked = OnUnlockItem;
+        items[2].GetComponent<Lock>().onUnlocked = items[3].GetComponent<Lock>().onUnlocked = OnUnlockItem;
         treasure.unlockedEvent = UnlockedTreasureEvent;
 
         interactiveSample.onPointerClick = (go) => { info.text = "Click"; };
@@ -212,11 +216,16 @@ public class Game : MonoBehaviour
 
         if (controller.SecondaryButtonDown)
         {
+            if (currentItemRaycastHit != null)
+            {
+                info.text = currentItemRaycastHit.name;
+            }
             //info.text = "SecondaryButtonDown";
             if (itemAttachedToLever1 == null)
             {
                 if (currentItemRaycastHit != null && itemAttachedToLever2 == null)
                 {
+                    attractItem.Play();
                     info.text = currentItemRaycastHit.name;
                     currentItemRaycastHit.SetParent(lever1End, true);
                     currentItemRaycastHit.localPosition = Vector3.zero;
@@ -234,6 +243,14 @@ public class Game : MonoBehaviour
             else
             {
                 info.text = "Drop " + itemAttachedToLever1.name;
+                if (itemAttachedToLever1.position.y >= dropHeight1)
+                {
+                    bigDrop.Play();
+                }
+                else if (itemAttachedToLever1.position.y >= dropHeight2)
+                {
+                    smallDrop.Play();
+                }
                 itemAttachedToLever1.SetParent(null);
                 itemAttachedToLever1.position = itemAttachedToLever1.GetComponent<InteractiveObject>().originalPosition;
                 itemAttachedToLever1.rotation = itemAttachedToLever1.GetComponent<InteractiveObject>().originalRotation;
