@@ -107,6 +107,7 @@ public class Lock : MonoBehaviour
         if (!transition)
         {
             confirm.Play();
+            isRight = Mathf.Abs(rings[current].localRotation.eulerAngles.z - answers[current].localRotation.eulerAngles.z) < 0.0078125f;
             isTotalRight = isTotalRight && isRight;
             rings[current].localRotation = answers[current].localRotation;
             current++;
