@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class Game : MonoBehaviour
@@ -246,6 +247,10 @@ public class Game : MonoBehaviour
                 if (itemAttachedToLever1.position.y >= dropHeight1)
                 {
                     bigDrop.Play();
+                    if (SceneManager.GetActiveScene().name == "test")
+                    {
+                        WatchDogBehavior.instance.AngryRate += 20;
+                    }
                 }
                 else if (itemAttachedToLever1.position.y >= dropHeight2)
                 {
@@ -311,5 +316,7 @@ public class Game : MonoBehaviour
         knife.gameObject.SetActive(true);
         knife.SetParent(lever1End, true);
         knife.localPosition = Vector3.zero;
+
+        WatchDogBehavior.instance.SecondPhase = true;
     }
 }
