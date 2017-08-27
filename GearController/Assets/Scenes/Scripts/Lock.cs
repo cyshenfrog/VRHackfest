@@ -123,7 +123,7 @@ public class Lock : MonoBehaviour
             }
             else
             {
-                rings[current - 1].gameObject.SetActive(false);
+                //rings[current - 1].gameObject.SetActive(false);
             }
         }
     }
