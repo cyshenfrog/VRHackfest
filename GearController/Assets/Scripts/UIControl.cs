@@ -18,20 +18,25 @@ public class UIControl : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        if (!Adjusted && (OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger) || GvrControllerInput.HomeButtonState || Input.GetMouseButton(0)))
+        if (!Adjusted)
         {
-            Cd -= Time.deltaTime;
-            if (Cd < 0)
+            if ((OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger) || GvrControllerInput.HomeButtonState || Input.GetMouseButton(0)))
             {
-                Adjusted = true;
-                PassUI.SetActive(true);
-                AdjustUI.SetActive(false);
+                Cd -= Time.deltaTime;
+                if (Cd < 0)
+                {
+                    Adjusted = true;
+                    PassUI.SetActive(true);
+                    AdjustUI.SetActive(false);
+                }
+            }
+            else
+            {
+                Cd = 0.5f;
             }
         }
         else
         {
-            Cd = 0.5f;
-
             if (ControlManager.Instance.TouchpadButtonDown || Input.GetMouseButtonDown(0))
             {
                 GoodlukUI.SetActive(true);
