@@ -12,6 +12,7 @@ ModelImporter:
     100008: KeyB003
     100010: KeyB004
     100012: KeyBmiddle
+    100014: keyB
     400000: keyA001
     400002: //RootNode
     400004: KeyB001
@@ -19,24 +20,28 @@ ModelImporter:
     400008: KeyB003
     400010: KeyB004
     400012: KeyBmiddle
+    400014: keyB
     2300000: keyA001
     2300002: KeyB001
     2300004: KeyB002
     2300006: KeyB003
     2300008: KeyB004
     2300010: KeyBmiddle
+    2300012: keyB
     3300000: keyA001
     3300002: KeyB001
     3300004: KeyB002
     3300006: KeyB003
     3300008: KeyB004
     3300010: KeyBmiddle
+    3300012: keyB
     4300000: KeyB001
     4300002: KeyB002
     4300004: KeyB003
     4300006: KeyB004
     4300008: KeyBmiddle
     4300010: keyA001
+    4300012: keyB
     9500000: //RootNode
   materials:
     importMaterials: 1
