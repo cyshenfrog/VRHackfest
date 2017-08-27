@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class Game : MonoBehaviour
 {
     private static Game _instance;
+
     public static Game Instance
     {
         get
@@ -22,6 +23,7 @@ public class Game : MonoBehaviour
         Intro,
         Gameplay,
     }
+
     public State state;
 
     public GameObject canvas;
@@ -30,6 +32,7 @@ public class Game : MonoBehaviour
     public InteractiveObject[] items;
 
     #region Pick Item
+
     public Transform gearVRControllerAnchor;
     public Transform daydreamControllerAnchor;
     public Transform controllerAnchor;
@@ -48,24 +51,31 @@ public class Game : MonoBehaviour
 
     public float dropHeight1, dropHeight2;
     public AudioSource bigDrop, smallDrop;
-    #endregion
+
+    #endregion Pick Item
 
     #region Unlock Key
+
     public float lastX;
-    #endregion
+
+    #endregion Unlock Key
 
     #region Unlock Treasure
+
     public Treasure treasure;
     public Transform knife;
-    #endregion
+
+    #endregion Unlock Treasure
 
     #region Cut Rope
+
     public bool firstGetKnife = true;
     public Quaternion lastKnifeRotation;
     public float cutTime = 1;
     public float cutTimer;
     public Transform rope;
-    #endregion
+
+    #endregion Cut Rope
 
     public const string CORRECT_ITEM = "CorrectItem";
     public const string WRONG_ITEM = "WrongItem";
@@ -91,7 +101,7 @@ public class Game : MonoBehaviour
         _instance = this;
     }
 
-    private IEnumerator Start ()
+    private IEnumerator Start()
     {
         while (ControlManager.Instance == null)
         {
@@ -117,7 +127,7 @@ public class Game : MonoBehaviour
         interactiveSample.onPointerExit = (go) => { info.text = "Exit"; };
     }
 
-    private void Update ()
+    private void Update()
     {
         if (controller == null)
         {
@@ -159,7 +169,7 @@ public class Game : MonoBehaviour
                     cutTimer += Time.deltaTime;
                     if (cutTimer >= cutTime)
                     {
-                        rope.gameObject.SetActive(false);
+                        //rope.gameObject.SetActive(false);
                     }
                     else
                     {
@@ -192,7 +202,7 @@ public class Game : MonoBehaviour
             line.SetPosition(0, controllerAnchor.position);
             line.SetPosition(1, controllerAnchor.position + controllerAnchor.forward * distanceForwardController);
         }
-        
+
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit))
         {
@@ -266,10 +276,26 @@ public class Game : MonoBehaviour
         if (itemAttachedToLever1 != null)
         {
             itemAttachedToLever1.rotation = controllerAnchor.rotation;
+            if (itemAttachedToLever1.position.y >= dropHeight2)
+            {
+                WatchDogBehavior.instance.OverShorder = true;
+            }
+            else
+            {
+                WatchDogBehavior.instance.OverShorder = false;
+            }
         }
         if (itemAttachedToLever2 != null)
         {
             itemAttachedToLever2.rotation = controllerAnchor.rotation;
+            if (itemAttachedToLever2.position.y >= dropHeight2)
+            {
+                WatchDogBehavior.instance.OverShorder = true;
+            }
+            else
+            {
+                WatchDogBehavior.instance.OverShorder = false;
+            }
         }
     }
 
@@ -305,6 +331,7 @@ public class Game : MonoBehaviour
             itemAttachedToLever1 = null;
         }
     }
+
     private void UnlockedTreasureEvent()
     {
         if (itemAttachedToLever2 != null)

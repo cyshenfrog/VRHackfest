@@ -12,6 +12,7 @@ public class printEular : MonoBehaviour
     private void Start()
     {
         text = GetComponent<Text>();
+        target = Camera.main.transform;
     }
 
     // Update is called once per frame

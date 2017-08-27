@@ -15,6 +15,7 @@ public class WatchDogBehavior : MonoBehaviour
     public float AngryRate;
     public Animator anim;
     public Text debugtext;
+    public Text TimeUI;
     public AudioSource Fx1;
     public AudioSource WalkFx;
     public AudioClip BGM2;
@@ -37,6 +38,7 @@ public class WatchDogBehavior : MonoBehaviour
     private float WarningValue = 120;
     private float RecoverValue = 80;
     private float NoticeValue = 0;
+    private float Timeleft = 180;
 
     private bool suspicion = false;
     private bool GoChecking = false;
@@ -61,7 +63,7 @@ public class WatchDogBehavior : MonoBehaviour
     }
 
     public bool OverShorder = false;
-    private bool CanAccumulate = true;
+    private bool CanAccumulate = false;
     private Vector3 posBeforeWarning;
     private Quaternion lastVRheadRot;
     private float delta;
@@ -82,8 +84,9 @@ public class WatchDogBehavior : MonoBehaviour
     // Use this for initialization
     private void Start()
     {
+        NoticeTarget = Camera.main.transform;
         WalkAround();
-        Invoke("OnSecondPhase", 15);
+        //Invoke("OnSecondPhase", 120);
         //Move(Vector3.forward * 10, 0, 2, () => { });
         lastVRheadRot = NoticeTarget.rotation;
     }
@@ -91,8 +94,14 @@ public class WatchDogBehavior : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        if (!CanAccumulate || Gameover) return;
+        if (Gameover) return;
+        if (secondPhase)
+        {
+            Timeleft -= Time.deltaTime;
+            TimeUI.text = Timeleft.ToString("0.00");
+        }
 
+        if (!CanAccumulate) return;
         if (secondPhase)
         {
             if (!suspicion && !GoChecking)
@@ -107,25 +116,26 @@ public class WatchDogBehavior : MonoBehaviour
                     TriggerAnim(AnimList.LookAround);
                 }
             }
-
+            Timeleft -= Time.deltaTime;
+            TimeUI.text = Timeleft.ToString("0.00");
             delta = Quaternion.Angle(NoticeTarget.rotation, lastVRheadRot);
             NoticeValue += delta * 0.5f * AngryRate;
 
             lastVRheadRot = NoticeTarget.rotation;
-            NoticeValue -= 0.2f * AngryRate;
+            NoticeValue -= 0.4f * AngryRate;
         }
         else
         {
             degreeOffset = NoticeTarget.eulerAngles.y > 180 ? Mathf.Abs(NoticeTarget.eulerAngles.y - 360) : NoticeTarget.eulerAngles.y;
-            turnLevel = Mathf.CeilToInt(degreeOffset / 15);
+            turnLevel = Mathf.CeilToInt(degreeOffset / 30);
             switch (turnLevel)
             {
                 case 0:
-                    NoticeValue -= 0.05f * AngryRate;
+                    NoticeValue -= 0.3f * AngryRate;
                     break;
 
                 case 1:
-                    NoticeValue -= 0.05f * AngryRate;
+                    NoticeValue -= 0.3f * AngryRate;
                     break;
 
                 case 2:
@@ -147,7 +157,7 @@ public class WatchDogBehavior : MonoBehaviour
 
             if (OverShorder)
             {
-                NoticeValue += 0.1f * AngryRate;
+                NoticeValue += 0.2f * AngryRate;
             }
         }
 
@@ -237,6 +247,7 @@ public class WatchDogBehavior : MonoBehaviour
     {
         secondPhase = true;
         BgmManager.instance.PlayBgm(BGM2);
+        TimeUI.gameObject.SetActive(true);
         Move(NoticePos.position, 0, 2, () =>
         {
             transform.DOLookAt(NoticeTarget.position, 0.5f).OnComplete(() =>
@@ -300,6 +311,11 @@ public class WatchDogBehavior : MonoBehaviour
             .SetEase(Ease.Linear)
             .SetDelay(delay)
             .OnComplete(() => { onFinish(); });
+    }
+
+    public void StartGame()
+    {
+        CanAccumulate = true;
     }
 
     private void Fail()

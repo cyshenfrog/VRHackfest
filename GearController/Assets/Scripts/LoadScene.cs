@@ -11,12 +11,15 @@ public class LoadScene : MonoBehaviour
     // Use this for initialization
     private void Start()
     {
-        Invoke("LoadTargetScene", 5);
     }
 
     // Update is called once per frame
     private void Update()
     {
+        if (ControlManager.Instance.TouchpadButtonDown || Input.GetMouseButtonDown(0))
+        {
+            LoadTargetScene();
+        }
     }
 
     private void LoadTargetScene()
@@ -29,5 +32,6 @@ public class LoadScene : MonoBehaviour
     private void Load()
     {
         SceneManager.LoadScene(SceneName);
+        Destroy(gameObject);
     }
 }
