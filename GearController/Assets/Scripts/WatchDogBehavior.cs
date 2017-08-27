@@ -16,6 +16,7 @@ public class WatchDogBehavior : MonoBehaviour
     public Animator anim;
     public Text debugtext;
     public Text TimeUI;
+    public GameObject RopeUI;
     public AudioSource Fx1;
     public AudioSource WalkFx;
     public AudioClip BGM2;
@@ -23,6 +24,9 @@ public class WatchDogBehavior : MonoBehaviour
     public AudioClip angry;
     public AudioClip notice;
     public GameObject FailUI;
+
+    public Image AngryFill;
+    public Image CutFill;
 
     private enum AnimList
     {
@@ -122,7 +126,7 @@ public class WatchDogBehavior : MonoBehaviour
             NoticeValue += delta * 0.5f * AngryRate;
 
             lastVRheadRot = NoticeTarget.rotation;
-            NoticeValue -= 0.4f * AngryRate;
+            NoticeValue -= 0.5f * AngryRate;
         }
         else
         {
@@ -131,11 +135,11 @@ public class WatchDogBehavior : MonoBehaviour
             switch (turnLevel)
             {
                 case 0:
-                    NoticeValue -= 0.3f * AngryRate;
+                    NoticeValue -= 0.5f * AngryRate;
                     break;
 
                 case 1:
-                    NoticeValue -= 0.3f * AngryRate;
+                    NoticeValue -= 0.5f * AngryRate;
                     break;
 
                 case 2:
@@ -176,7 +180,8 @@ public class WatchDogBehavior : MonoBehaviour
 
         if (NoticeValue < 0)
             NoticeValue = 0;
-
+        AngryFill.fillAmount = NoticeValue / 200;
+        CutFill.fillAmount = 1 - (Game.Instance.cutTimer / Game.Instance.cutTime);
         debugtext.text = NoticeValue.ToString();
     }
 
@@ -248,6 +253,7 @@ public class WatchDogBehavior : MonoBehaviour
         secondPhase = true;
         BgmManager.instance.PlayBgm(BGM2);
         TimeUI.gameObject.SetActive(true);
+        RopeUI.gameObject.SetActive(true);
         Move(NoticePos.position, 0, 2, () =>
         {
             transform.DOLookAt(NoticeTarget.position, 0.5f).OnComplete(() =>
