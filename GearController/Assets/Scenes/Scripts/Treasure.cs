@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,15 +18,13 @@ public class Treasure : MonoBehaviour
     public AudioSource rejectKey;
     public AudioSource unlockAudio;
 
-	private void Start ()
+    private void Start()
     {
-		
-	}
+    }
 
-    private void Update ()
+    private void Update()
     {
-		
-	}
+    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -59,7 +58,8 @@ public class Treasure : MonoBehaviour
             if (timer >= unlockTime)
             {
                 timer = 0;
-                bodies[key.id].gameObject.SetActive(false);
+                //bodies[key.id].gameObject.SetActive(false);
+                bodies[key.id].GetComponent<DOTweenAnimation>().DOPlay();
                 key.Reset();
                 unlockAudio.Play();
                 unlockCount++;
