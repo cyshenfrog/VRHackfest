@@ -33,7 +33,7 @@ public class Lock : MonoBehaviour
         
     }
 
-    public void Reset()
+    public void Reset(bool disable = false)
     {
         current = 0;
         isTotalRight = true;
@@ -52,6 +52,10 @@ public class Lock : MonoBehaviour
             Game.Instance.currentLock = Game.Instance.itemAttachedToLever1 = null;
         }
         Game.Instance.itemAttachedToLever2 = null;
+        if (disable)
+        {
+            gameObject.SetActive(false);
+        }
     }
 
     private void Update ()
@@ -108,6 +112,7 @@ public class Lock : MonoBehaviour
         {
             confirm.Play();
             isRight = Mathf.Abs(rings[current].localRotation.eulerAngles.z - answers[current].localRotation.eulerAngles.z) < 0.0078125f;
+            Game.Instance.info.text = isRight.ToString();
             isTotalRight = isTotalRight && isRight;
             rings[current].localRotation = answers[current].localRotation;
             current++;
@@ -121,6 +126,7 @@ public class Lock : MonoBehaviour
                 }
                 done = true;
                 solved = isTotalRight;
+                Game.Instance.info.text = solved.ToString();
             }
             else
             {

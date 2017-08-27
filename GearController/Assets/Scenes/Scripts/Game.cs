@@ -74,6 +74,7 @@ public class Game : MonoBehaviour
     public float cutTime = 1;
     public float cutTimer;
     public Transform rope;
+    public GameObject victory;
 
     #endregion Cut Rope
 
@@ -149,6 +150,7 @@ public class Game : MonoBehaviour
                 firstGetKnife = false;
                 lever1.rotation = lever2.rotation = controllerAnchor.rotation * Quaternion.Euler(0, 180, 0);
                 lastKnifeRotation = knife.rotation;
+                cutTimer = 0;
             }
             else
             {
@@ -164,12 +166,13 @@ public class Game : MonoBehaviour
                 }
                 angle = Mathf.Abs(angle);
                 info.text = dot + " " + angle;
-                if ((dot >= 0.75 || dot <= -0.75) && angle >= 3)
+                if (true || ((dot >= 0.75 || dot <= -0.75) && angle >= 3))
                 {
                     cutTimer += Time.deltaTime;
                     if (cutTimer >= cutTime)
                     {
                         //rope.gameObject.SetActive(false);
+                        victory.SetActive(true);
                     }
                     else
                     {

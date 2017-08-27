@@ -34,17 +34,20 @@ public class Treasure : MonoBehaviour
             if (!key.done)
             {
                 allowToCheck = false;
+                Game.Instance.info.text = key.name + " " + key.done;
                 return;
             }
-            if (!key.solved ||
-                (key.id == 1 && bodies[0].gameObject.activeSelf))
+            if (!key.solved/* ||
+                (key.id == 1 && bodies[0].gameObject.activeSelf)*/)
             {
+                Game.Instance.info.text = key.name + " " + key.solved + " " + bodies[0].gameObject.activeSelf;
                 rejectKey.Play();
                 allowToCheck = false;
                 key.Reset();
                 return;
             }
         }
+        attract.Play();
         allowToCheck = true;
     }
 
@@ -55,12 +58,28 @@ public class Treasure : MonoBehaviour
         {
             Game.Instance.info.text = timer.ToString();
             timer += Time.deltaTime;
-            if (timer >= unlockTime)
+            if (unlockCount == 1)
+            {
+                bodies[key.id].GetComponent<DOTweenAnimation>().DOPlay();
+                key.Reset(true);
+                unlockAudio.Play();
+                unlockCount++;
+                if (unlockCount == bodies.Length)
+                {
+                    unlocked = true;
+                    if (unlockedEvent != null)
+                    {
+                        unlockedEvent();
+                    }
+                }
+            }
+            else if (timer >= unlockTime)
             {
                 timer = 0;
                 //bodies[key.id].gameObject.SetActive(false);
                 bodies[key.id].GetComponent<DOTweenAnimation>().DOPlay();
-                key.Reset();
+                key.Reset(true);
+                Game.Instance.info.text = "unlock " + key.name;
                 unlockAudio.Play();
                 unlockCount++;
                 if (unlockCount == bodies.Length)
