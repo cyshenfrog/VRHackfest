@@ -42,6 +42,7 @@ public class WatchDogBehavior : MonoBehaviour
     private bool GoChecking = false;
     private bool toggleTarget = false;
     private bool secondPhase = false;
+    private bool Gameover = false;
 
     public bool SecondPhase
     {
@@ -82,7 +83,7 @@ public class WatchDogBehavior : MonoBehaviour
     private void Start()
     {
         WalkAround();
-        Invoke("OnSecondPhase", 3);
+        Invoke("OnSecondPhase", 15);
         //Move(Vector3.forward * 10, 0, 2, () => { });
         lastVRheadRot = NoticeTarget.rotation;
     }
@@ -90,7 +91,7 @@ public class WatchDogBehavior : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        if (!CanAccumulate) return;
+        if (!CanAccumulate || Gameover) return;
 
         if (secondPhase)
         {
@@ -108,10 +109,10 @@ public class WatchDogBehavior : MonoBehaviour
             }
 
             delta = Quaternion.Angle(NoticeTarget.rotation, lastVRheadRot);
-            NoticeValue += delta * AngryRate;
+            NoticeValue += delta * 0.5f * AngryRate;
 
             lastVRheadRot = NoticeTarget.rotation;
-            NoticeValue -= 0.05f * AngryRate;
+            NoticeValue -= 0.2f * AngryRate;
         }
         else
         {
@@ -303,7 +304,7 @@ public class WatchDogBehavior : MonoBehaviour
 
     private void Fail()
     {
-        CanAccumulate = false;
+        Gameover = true;
         FailUI.SetActive(true);
         BgmManager.instance.VolumeFadeout(0.5f, BgmManager.Channel.bgmSource);
     }
