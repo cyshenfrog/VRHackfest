@@ -48,7 +48,7 @@ public class WatchDogBehavior : MonoBehaviour
     private bool GoChecking = false;
     private bool toggleTarget = false;
     private bool secondPhase = false;
-    private bool Gameover = false;
+    public bool Gameover = false;
 
     public bool SecondPhase
     {

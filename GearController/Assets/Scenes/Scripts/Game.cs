@@ -173,6 +173,7 @@ public class Game : MonoBehaviour
                     {
                         //rope.gameObject.SetActive(false);
                         victory.SetActive(true);
+                        WatchDogBehavior.instance.Gameover = true;
                     }
                     else
                     {
